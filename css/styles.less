@@ -1,3 +1,5 @@
+@import url(../icomoon/mixins.less);
+
 .search {
 	form.initial {
 		width: 500px;
@@ -20,5 +22,15 @@
 		}
 
 		.template { display: none; }
+
+		.event-search,
+		.conference-search {
+			.icon-search();
+
+			font-size: 0;
+			&::before {
+				font-size: 16px;
+			}
+		}
 	}
 }

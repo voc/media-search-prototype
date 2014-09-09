@@ -3,7 +3,8 @@ $(function() {
 		$search = $('.search'),
 		$results = $('.results'),
 		$template = $results.find('> ol > li.template').detach(),
-		baseUrl = window.location.protocol+'//'+window.location.host+window.location.pathname;
+		baseUrl = window.location.protocol+'//'+window.location.host+window.location.pathname,
+		baseTitle = document.title;
 
 	$search
 		.find('input.text')
@@ -14,59 +15,136 @@ $(function() {
 		var
 			$submit = $(this),
 			$form = $submit.closest('form'),
-			$input = $form.find('input.text');
+			$input = $form.find('input.text'),
+			term = $input.val(),
+			lterm = term.toLowerCase(),
+			title = '"'+$input.val()+'" - '+baseTitle;
 
+		document.title = title;
+		window.history.pushState({}, title, '?q='+encodeURIComponent($input.val()));
+
+		$input.blur();
 		$.ajax({
 			dataType: $.support.cors ? 'json' : 'jsonp',
-			url: 'http://178.62.143.243:9200/media/_search/',
+			url: 'http://178.62.143.243:9200/media/event/_search/',
 			type: 'post',
 			data: JSON.stringify({
-				'query': {
-					'term': {
-						'_all': $input.val().toLowerCase()
+				query: {
+					bool: {
+						should: [
+							{
+								multi_match: {
+									query: lterm,
+									fields: [
+										'event.title^4',
+										'event.subtitle^3',
+										'event.description^3',
+										'conference.acronym^2',
+										'conference.title^2',
+										'event.persons^1'
+									],
+									type: 'best_fields',
+									operator: 'or',
+									fuzziness: 'AUTO'
+								},
+							},
+							{
+								prefix: {
+									'event.title': {
+										value: lterm,
+										boost: 20
+									}
+								}
+							},
+							{
+								prefix: {
+									'event.subtitle': {
+										value: lterm,
+										boost: 10
+									}
+								}
+							},
+							{
+								prefix: {
+									'conference.acronym': {
+										value: lterm,
+										boost: 5
+									}
+								}
+							},
+							{
+								prefix: {
+									'conference.persons': {
+										value: lterm,
+										boost: 3
+									}
+								}
+							}
+						]
 					}
-				}
+				},
+				sort : [
+					"_score",
+					{ "event.date": { "order": "desc" }},
+				]
 			}),
 			success: function(res) {
-				$results.find('> ol > li').remove();
-
-				jQuery.each(res.hits.hits, function(idx, hit) {
-					var $item = $template
-						.clone()
-						.appendTo($results)
-						.removeClass('template')
-						.find('.conference-link')
-							.text('tbd.;')
-							.attr('href', 'http://media.ccc.de/browse/conferences/tbd.;')
-						.end()
-						.find('.conference-search')
-							.text('tbd.;')
-							.attr('href', baseUrl+'?q='+encodeURIComponent('tbd.;'))
-						.end()
-						.find('.event-link')
-							.text(hit._source.title)
-							.attr('href', hit._source.frontend_link)
-						.end()
-						.find('.event-search')
-							.text(hit._source.title)
-							.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.title))
+				var
+					searchBase = $results.data('searchfor'),
+					$list = $results
+						.find('> ol')
+						.find('> li')
+							.remove()
 						.end();
 
-					var
-						$persons = $item.find('ul.persons'),
-						$personTemplate = $persons.find('li.template').detach();
-
-					jQuery.each(hit._source.persons, function(idx, person) {
-						$personTemplate
+				if(res.hits.hits.length == 0) {
+					$('<li>')
+						.addClass('no-results')
+						.text($results.data('noresults'))
+						.appendTo($list);
+				}
+				else {
+					jQuery.each(res.hits.hits, function(idx, hit) {
+						var $item = $template
 							.clone()
+							.appendTo($list)
 							.removeClass('template')
-							.find('.person-link')
-								.text(person)
-								.attr('href', baseUrl+'?q=person:'+encodeURIComponent(person))
+							.find('.conference-link')
+								.text(hit._source.conference.acronym)
+								.attr('title', hit._source.conference.title)
+								.attr('href', hit._source.conference.frontend_link)
 							.end()
-							.appendTo($persons);
+							.find('.conference-search')
+								.text(hit._source.conference.acronym)
+								.attr('title', searchBase+' "'+hit._source.conference.title+'"')
+								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.conference.title))
+							.end()
+							.find('.event-link')
+								.text(hit._source.event.title)
+								.attr('href', hit._source.event.frontend_link)
+							.end()
+							.find('.event-search')
+								.text(hit._source.event.title)
+								.attr('title', searchBase+' "'+hit._source.event.title+'"')
+								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.event.title))
+							.end();
+
+						var
+							$persons = $item.find('ul.persons'),
+							$personTemplate = $persons.find('li.template').detach();
+
+						jQuery.each(hit._source.event.persons, function(idx, person) {
+							$personTemplate
+								.clone()
+								.removeClass('template')
+								.find('.person-link')
+									.text(person)
+									.attr('href', baseUrl+'?q='+encodeURIComponent(person))
+								.end()
+								.appendTo($persons);
+						});
 					});
-				});
+				}
 
 				if(triggerOrigin == 'param') {
 					$results.removeClass('initial');
