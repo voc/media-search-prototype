@@ -47,3 +47,6 @@
 .search .results .conference-search::before {
   font-size: 16px;
 }
+.search .results .no-results {
+  list-style-type: none;
+}

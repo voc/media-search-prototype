@@ -3,6 +3,7 @@ $(function() {
 		$search = $('.search'),
 		$results = $('.results'),
 		$template = $results.find('> ol > li.template').detach(),
+		$noresults = $results.find('> ol > li.no-results').detach(),
 		baseUrl = window.location.protocol+'//'+window.location.host+window.location.pathname,
 		baseTitle = document.title;
 
@@ -98,10 +99,7 @@ $(function() {
 						.end();
 
 				if(res.hits.hits.length == 0) {
-					$('<li>')
-						.addClass('no-results')
-						.text($results.data('noresults'))
-						.appendTo($list);
+					$noresults.appendTo($list);
 				}
 				else {
 					jQuery.each(res.hits.hits, function(idx, hit) {
