@@ -116,9 +116,17 @@ $(function() {
 				}
 				else {
 					jQuery.each(res.hits.hits, function(idx, hit) {
+						var quality = hit._score * 100 / res.hits.max_score;
 						var $item = $template
 							.clone()
 							.appendTo($list)
+							.attr('data-quality', quality) // .data() does not show up in the DOM
+							.addClass(
+								quality > 80 ? 'high' :
+								quality > 50 ? 'medium' :
+								quality > 30 ? 'low' :
+								'nonsense'
+							)
 							.removeClass('template')
 							.find('.conference-link')
 								.text(hit._source.conference.acronym)
