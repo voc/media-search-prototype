@@ -104,7 +104,8 @@ $(function() {
 			}),
 			success: function(res) {
 				var
-					searchBase = $results.data('searchfor'),
+					conferenceSearchBase = $template.find('.conference-search').data('titletpl'),
+					eventSearchBase = $template.find('.event-search').data('titletpl'),
 					$list = $results
 						.find('> ol')
 						.find('> li')
@@ -135,7 +136,7 @@ $(function() {
 							.end()
 							.find('.conference-search')
 								.text(hit._source.conference.acronym)
-								.attr('title', searchBase+' "'+hit._source.conference.title+'"')
+								.attr('title', conferenceSearchBase.replace('%', hit._source.conference.title))
 								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.conference.title))
 							.end()
 							.find('.event-link')
@@ -144,7 +145,7 @@ $(function() {
 							.end()
 							.find('.event-search')
 								.text(hit._source.event.title)
-								.attr('title', searchBase+' "'+hit._source.event.title+'"')
+								.attr('title', eventSearchBase.replace('%', hit._source.event.title))
 								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.event.title))
 							.end();
 
