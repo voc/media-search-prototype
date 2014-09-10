@@ -56,7 +56,7 @@ $(function() {
 										prefix: {
 											'event.title': {
 												value: lterm,
-												boost: 6
+												boost: 12
 											}
 										}
 									},
@@ -87,18 +87,20 @@ $(function() {
 								]
 							}
 						},
+						boost: 1.2,
 						functions: [
 							{
 								"gauss": {
 									"event.date": {
-										"scale": "48w",
-										"decay": 0.3
+										"scale": "96w",
+										"decay": 0.5
 									}
 								}
 							}
 						]
 					}
-				}
+				},
+				size: 20
 			}),
 			success: function(res) {
 				var
