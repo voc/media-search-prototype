@@ -49,7 +49,7 @@ $(function() {
 											],
 											type: 'best_fields',
 											operator: 'or',
-											fuzziness: 'AUTO'
+											fuzziness: 1
 										},
 									},
 									{
