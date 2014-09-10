@@ -1,0 +1,52 @@
+.search {
+	padding-bottom: 50px;
+
+	form {
+		&.initial {
+			width: 450px;
+			margin: 50px auto;
+			border: 1px solid silver;
+			padding: 30px;
+
+			&, h1 {
+				text-align: center;
+			}
+		}
+	}
+
+	.results ol > li {
+		list-style-position: inside;
+		padding: 10px 10px 20px 10px;
+		font-size: 35px;
+
+		a, ul {
+			font-size: 16px;
+		}
+	}
+
+	.paging {
+		overflow: hidden;
+		margin: 50px 0 0 150px;
+
+		li {
+			font-size: 18px;
+		}
+
+		li.page {
+		}
+
+		a {
+			width: 1.2em;
+			display: block;
+			color: @link;
+			text-decoration: none;
+
+			.number { color: black; }
+			&:hover .number { text-decoration: underline; }
+		}
+
+		.postix {
+			padding-left: 4px;
+		}
+	}
+}

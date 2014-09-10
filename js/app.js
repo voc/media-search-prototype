@@ -174,21 +174,21 @@ $(function() {
 							)
 							.removeClass('template')
 							.find('.conference-link')
-								.text(hit._source.conference.acronym)
+								.text(jQuery.trim(hit._source.conference.title))
 								.attr('title', hit._source.conference.title)
 								.attr('href', hit._source.conference.frontend_link)
 							.end()
 							.find('.conference-search')
-								.text(hit._source.conference.acronym)
+								.text(jQuery.trim(hit._source.conference.acronym))
 								.attr('title', conferenceSearchBase.replace('%', hit._source.conference.title))
 								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.conference.title))
 							.end()
 							.find('.event-link')
-								.text(hit._source.event.title)
+								.text(jQuery.trim(hit._source.event.title))
 								.attr('href', hit._source.event.frontend_link)
 							.end()
 							.find('.event-search')
-								.text(hit._source.event.title)
+								.text(jQuery.trim(hit._source.event.title))
 								.attr('title', eventSearchBase.replace('%', hit._source.event.title))
 								.attr('href', baseUrl+'?q='+encodeURIComponent(hit._source.event.title))
 							.end();
@@ -210,6 +210,7 @@ $(function() {
 					});
 				}
 
+				$form.addClass('fullsize');
 				if(triggerOrigin == 'param') {
 					$results.removeClass('initial');
 				}
@@ -218,8 +219,6 @@ $(function() {
 				{
 					$form.add($results).css({opacity: 0}).removeClass('initial').animate({
 						opacity: 1
-					}, {
-						opacity: 0
 					})
 				}
 			}
