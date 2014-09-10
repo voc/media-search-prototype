@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Search - media.ccc.de</title>
+		<title data-titeltpl="&quot#&quot - Search - media.ccc.de">Search - media.ccc.de</title>
 		<meta name="description" content="Prototyp of a media.ccc.de-Search">
 
 		<link rel="stylesheet" href="css/styles.css">
@@ -21,6 +21,10 @@
 		</form>
 
 		<section class="results initial">
+			<div class="statistics">
+				<span class="visible">#</span> of <span class="total">#</span> Results (in <span class="runtime">#</span> ms)
+			</div>
+
 			<ol>
 				<li class="no-results">No results</li>
 
@@ -32,6 +36,13 @@
 					</ul>
 				</li>
 			</ol>
+
+			<ul class="paging">
+				<li class="prefix">M</li>
+				<li class="page template"><a href="#">e <div class="number">1</div></a></li>
+				<li class="postfix">dia</li>
+			</ul>
 		</section>
+
 	</body>
 </html>

@@ -11,6 +11,12 @@
 .search .results.initial {
   display: none;
 }
+.search .results .paging {
+  display: none;
+}
+.search .results .paging.visible {
+  display: block;
+}
 .search .results .template {
   display: none;
 }
@@ -38,4 +44,11 @@
 }
 .search .results .no-results {
   list-style-type: none;
+}
+.search .paging li {
+  display: block;
+  text-align: center;
+  float: left;
+  list-style-type: none;
+  width: 1em;
 }

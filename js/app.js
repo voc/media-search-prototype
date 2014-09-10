@@ -2,10 +2,16 @@ $(function() {
 	var
 		$search = $('.search'),
 		$results = $('.results'),
+		$statistics = $results.find('.statistics'),
+		$paging = $results.find('.paging'),
+		$pagingPostfix = $paging.find('.postfix'),
+		$pagingTemplate = $paging.find('.template').detach(),
 		$template = $results.find('> ol > li.template').detach(),
 		$noresults = $results.find('> ol > li.no-results').detach(),
 		baseUrl = window.location.protocol+'//'+window.location.host+window.location.pathname,
-		baseTitle = document.title;
+		baseTitleTpl = $('title').data('titletpl'),
+		pageNr = 0,
+		perPage = 15;
 
 	$search
 		.find('input.text')
@@ -19,10 +25,11 @@ $(function() {
 			$input = $form.find('input.text'),
 			term = $input.val(),
 			lterm = term.toLowerCase(),
-			title = '"'+$input.val()+'" - '+baseTitle;
+			title = baseTitleTpl.replace('#', $input.val());
 
 		document.title = title;
-		window.history.pushState({}, title, '?q='+encodeURIComponent($input.val()));
+		if(window.history && window.history.pushState)
+			window.history.pushState({}, title, '?q='+encodeURIComponent(term));
 
 		$input.blur();
 		$.ajax({
@@ -100,7 +107,8 @@ $(function() {
 						]
 					}
 				},
-				size: 20
+				from: pageNr*perPage,
+				size: perPage
 			}),
 			success: function(res) {
 				var
@@ -111,6 +119,34 @@ $(function() {
 						.find('> li')
 							.remove()
 						.end();
+
+				$statistics
+					.find('.visible')
+						.text(res.hits.hits.length)
+					.end()
+					.find('.total')
+						.text(res.hits.total)
+					.end()
+					.find('.runtime')
+						.text(res.took);
+
+				$paging.toggleClass('visible', res.hits.total > res.hits.hits.length);
+				if(res.hits.total > res.hits.hits.length) {
+					$paging.find('li.page').remove();
+					var npages = Math.floor(10, Math.ceil(res.hits.total / perPage));
+					for (var i = 0; i < npages; i++) {
+						$pagingTemplate
+							.clone()
+							.removeClass('template')
+							.find('a')
+								.attr('href', '?p='+i+'&q='+encodeURIComponent(term))
+							.end()
+							.find('.number')
+								.text(i+1)
+							.end()
+							.insertBefore($pagingPostfix);
+					}
+				}
 
 				if(res.hits.hits.length == 0) {
 					$noresults.appendTo($list);

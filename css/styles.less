@@ -12,6 +12,12 @@
 			display: none;
 		}
 
+		.paging {
+			display: none;
+			&.visible {
+				display: block;
+			}
+		}
 		.template { display: none; }
 
 		.event-search,
@@ -26,6 +32,16 @@
 
 		.no-results {
 			list-style-type: none;
+		}
+	}
+
+	.paging {
+		li {
+			display: block;
+			text-align: center;
+			float: left;
+			list-style-type: none;
+			width: 1em;
 		}
 	}
 }
