@@ -31,63 +31,74 @@ $(function() {
 			type: 'post',
 			data: JSON.stringify({
 				query: {
-					bool: {
-						should: [
-							{
-								multi_match: {
-									query: lterm,
-									fields: [
-										'event.title^4',
-										'event.subtitle^3',
-										'event.description^3',
-										'conference.acronym^2',
-										'conference.title^2',
-										'event.persons^1'
-									],
-									type: 'best_fields',
-									operator: 'or',
-									fuzziness: 'AUTO'
-								},
-							},
-							{
-								prefix: {
-									'event.title': {
-										value: lterm,
-										boost: 20
+					function_score: {
+						query: {
+							bool: {
+								disable_coord: true,
+								should: [
+									{
+										multi_match: {
+											query: lterm,
+											fields: [
+												'event.title^4',
+												'event.subtitle^3',
+												'event.persons^3',
+												'conference.acronym^2',
+												'conference.title^2',
+												'event.description^1'
+											],
+											type: 'best_fields',
+											operator: 'or',
+											fuzziness: 'AUTO'
+										},
+									},
+									{
+										prefix: {
+											'event.title': {
+												value: lterm,
+												boost: 6
+											}
+										}
+									},
+									{
+										prefix: {
+											'event.subtitle': {
+												value: lterm,
+												boost: 3
+											}
+										}
+									},
+									{
+										prefix: {
+											'conference.acronym': {
+												value: lterm,
+												boost: 2
+											}
+										}
+									},
+									{
+										prefix: {
+											'conference.persons': {
+												value: lterm,
+												boost: 1
+											}
+										}
 									}
-								}
-							},
+								]
+							}
+						},
+						functions: [
 							{
-								prefix: {
-									'event.subtitle': {
-										value: lterm,
-										boost: 10
-									}
-								}
-							},
-							{
-								prefix: {
-									'conference.acronym': {
-										value: lterm,
-										boost: 5
-									}
-								}
-							},
-							{
-								prefix: {
-									'conference.persons': {
-										value: lterm,
-										boost: 3
+								"gauss": {
+									"event.date": {
+										"scale": "48w",
+										"decay": 0.3
 									}
 								}
 							}
 						]
 					}
-				},
-				sort : [
-					"_score",
-					{ "event.date": { "order": "desc" }},
-				]
+				}
 			}),
 			success: function(res) {
 				var
