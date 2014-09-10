@@ -17,7 +17,7 @@ $(function() {
 		.find('input.text')
 		.focus()
 	.end()
-	.on('click', 'input.submit', function(e, triggerOrigin) {
+	.on('click', 'input.submit', function(e, triggerOrigin, displayPage) {
 		e.preventDefault();
 		var
 			$submit = $(this),
@@ -27,9 +27,11 @@ $(function() {
 			lterm = term.toLowerCase(),
 			title = baseTitleTpl.replace('#', $input.val());
 
+		displayPage = displayPage || 0;
+
 		document.title = title;
 		if(window.history && window.history.pushState)
-			window.history.pushState({}, title, '?q='+encodeURIComponent(term));
+			window.history.pushState({}, title, '?' + (displayPage > 0 ? 'p='+displayPage+'&' : '') + 'q='+encodeURIComponent(term));
 
 		$input.blur();
 		$.ajax({
@@ -107,7 +109,7 @@ $(function() {
 						]
 					}
 				},
-				from: pageNr*perPage,
+				from: displayPage * perPage,
 				size: perPage
 			}),
 			success: function(res) {
@@ -121,8 +123,11 @@ $(function() {
 						.end();
 
 				$statistics
-					.find('.visible')
-						.text(res.hits.hits.length)
+					.find('.start')
+						.text(displayPage * perPage)
+					.end()
+					.find('.end')
+						.text(displayPage * perPage + res.hits.hits.length)
 					.end()
 					.find('.total')
 						.text(res.hits.total)
@@ -133,13 +138,15 @@ $(function() {
 				$paging.toggleClass('visible', res.hits.total > res.hits.hits.length);
 				if(res.hits.total > res.hits.hits.length) {
 					$paging.find('li.page').remove();
-					var npages = Math.floor(10, Math.ceil(res.hits.total / perPage));
+					var npages = Math.min(Math.max(10, displayPage+3), Math.ceil(res.hits.total / perPage));
 					for (var i = 0; i < npages; i++) {
 						$pagingTemplate
 							.clone()
 							.removeClass('template')
+							.toggleClass('active', i == displayPage)
 							.find('a')
 								.attr('href', '?p='+i+'&q='+encodeURIComponent(term))
+								.data('page', i)
 							.end()
 							.find('.number')
 								.text(i+1)
@@ -152,6 +159,7 @@ $(function() {
 					$noresults.appendTo($list);
 				}
 				else {
+					$results.find('> ol').attr('start', displayPage * perPage + 1)
 					jQuery.each(res.hits.hits, function(idx, hit) {
 						var quality = hit._score * 100 / res.hits.max_score;
 						var $item = $template
@@ -228,6 +236,12 @@ $(function() {
 				duration: 0.75
 			})
 		}
+	})
+	.on('click', '.paging a', function(e) {
+		e.preventDefault();
+		$search
+			.find('input.submit')
+			.trigger('click', ['param', $(this).data('page')]);
 	});
 
 	var param = $.url().param();
@@ -237,6 +251,6 @@ $(function() {
 			.val(param.q)
 		.end()
 			.find('input.submit')
-			.trigger('click', 'param');
+			.trigger('click', ['param', param.p]);
 	}
 });
