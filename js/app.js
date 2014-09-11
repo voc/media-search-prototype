@@ -124,7 +124,7 @@ $(function() {
 
 				$statistics
 					.find('.start')
-						.text(displayPage * perPage)
+						.text(displayPage * perPage + 1)
 					.end()
 					.find('.end')
 						.text(displayPage * perPage + res.hits.hits.length)
