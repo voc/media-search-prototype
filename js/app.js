@@ -138,7 +138,10 @@ $(function() {
 				$paging.toggleClass('visible', res.hits.total > res.hits.hits.length);
 				if(res.hits.total > res.hits.hits.length) {
 					$paging.find('li.page').remove();
-					var npages = Math.min(Math.max(10, displayPage+3), Math.ceil(res.hits.total / perPage));
+					var
+						maxpages = res.hits.total / perPage,
+						npages = Math.min(Math.max(10, displayPage+3), Math.ceil(maxpages));
+
 					for (var i = 0; i < npages; i++) {
 						$pagingTemplate
 							.clone()
@@ -153,6 +156,20 @@ $(function() {
 							.end()
 							.insertBefore($pagingPostfix);
 					}
+
+					$paging
+						.find('.next')
+							.toggleClass('visible', displayPage < maxpages-1)
+							.find('> a')
+								.attr('href', '?p='+(displayPage+1)+'&q='+encodeURIComponent(term))
+								.data('page', displayPage+1)
+							.end()
+						.end()
+						.find('.prev')
+							.toggleClass('visible', displayPage > 0)
+							.find('> a')
+								.attr('href', '?p='+(displayPage-1)+'&q='+encodeURIComponent(term))
+								.data('page', displayPage-1)
 				}
 
 				if(res.hits.hits.length == 0) {

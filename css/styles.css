@@ -34,20 +34,30 @@
 .search .paging li {
   font-size: 18px;
 }
-.search .paging a {
+.search .paging li.page a {
   width: 1.2em;
   display: block;
-  color: #428bca;
   text-decoration: none;
 }
-.search .paging a .number {
-  color: black;
-}
-.search .paging a:hover .number {
+.search .paging li.page a:hover .number {
   text-decoration: underline;
 }
 .search .paging .postix {
   padding-left: 4px;
+}
+.search .paging .next,
+.search .paging .prev {
+  visibility: hidden;
+}
+.search .paging .next.visible,
+.search .paging .prev.visible {
+  visibility: visible;
+}
+.search .paging .next {
+  margin-left: 30px;
+}
+.search .paging .prev {
+  margin-right: 30px;
 }
 body {
   background-color: #d9e3ec;
@@ -135,10 +145,25 @@ body {
 .search .results ol > li .event-link {
   font-size: 21px;
 }
+.search .results ol > li .persons {
+  padding-left: 70px;
+}
+.search .results ol > li:last-child {
+  border-bottom-style: none;
+}
 .search .results .statistics {
   font-size: 12px;
   color: #333;
   margin: 0 0 30px 10px;
+}
+.search .paging li a {
+  color: #428bca;
+}
+.search .paging li a .number {
+  color: black;
+}
+.search .paging li.active a {
+  color: red;
 }
 .search {
   padding-bottom: 30px;

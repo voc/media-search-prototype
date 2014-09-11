@@ -35,18 +35,23 @@
 		li.page {
 		}
 
-		a {
+		li.page a {
 			width: 1.2em;
 			display: block;
-			color: @link;
 			text-decoration: none;
 
-			.number { color: black; }
 			&:hover .number { text-decoration: underline; }
 		}
 
 		.postix {
 			padding-left: 4px;
 		}
+
+		.next, .prev {
+			visibility: hidden;
+			&.visible { visibility: visible; }
+		}
+		.next { margin-left: 30px; }
+		.prev { margin-right: 30px; }
 	}
 }

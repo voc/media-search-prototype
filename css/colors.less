@@ -135,4 +135,17 @@ body {
 			margin: 0 0 30px 10px;
 		}
 	}
+
+	.paging {
+		li {
+			a {
+				color: @link;
+				.number { color: black; }
+			}
+
+			&.active a {
+				color: red;
+			}
+		}
+	}
 }
