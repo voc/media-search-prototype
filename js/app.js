@@ -182,7 +182,7 @@ $(function() {
 						var $item = $template
 							.clone()
 							.appendTo($list)
-							.attr('data-quality', quality) // .data() does not show up in the DOM
+							.attr('data-quality', quality) // .data() does not show up in the DOM and this is mainly for debugging
 							.addClass(
 								quality > 80 ? 'high' :
 								quality > 50 ? 'medium' :
@@ -228,6 +228,7 @@ $(function() {
 				}
 
 				$form.addClass('fullsize');
+				window.scrollTo(0, 0);
 				if(triggerOrigin == 'param') {
 					$results.removeClass('initial');
 				}
