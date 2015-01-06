@@ -4,56 +4,127 @@ use v5.12;
 use strict;
 use warnings;
 
-use local::lib ("$ENV{HOME}/.perl5");
+use local::lib;
 
 use Mojolicious::Lite;
 use Search::Elasticsearch;
 use Data::Dumper;
 
+plugin JSONP => callback => 'callback';
+
 my $e = Search::Elasticsearch->new();
 
 sub dosearch {
-	my $query = shift;
-
 	my $ret = $e->search(
 		index => 'media',
 		type => 'event',
 		body => {
-			query => $query,
+			@_
 		}
 	);
 }
 
-get '/:string' => sub {
+sub term_search {
 	my $c = shift;
-	my $str = $c->param('string');
+	my $str = lc($c->param('term') // "");
+	my $page = $c->param('displayPage') // 0;
+	my $per_page = $c->param('perPage') // 10;
 
-	my $ret = dosearch({
-			bool => {
-				should => [
-					{match => { 'event.title' => { query => $str, fuzziness => "AUTO"}}},
-					{match => { 'event.description' => {query => $str, fuzziness => "AUTO"}}},
-					{match => { 'event.persons' => {query => $str, fuzziness => "AUTO"}}},
-					{match => { 'conference.title' => {query => $str, fuzziness => "AUTO"}}},
-					{match => { 'conference.acronym' => {query => $str, fuzziness => "AUTO"}}},
-				]
-			}
-		});
+	my $ret = dosearch(
+			query => {
+				function_score => {
+					query => {
+						bool => {
+							disable_coord => 1,
+							should => [
+								{
+									multi_match => {
+										query => $str,
+										fields => [
+											'event.title^4',
+											'event.subtitle^3',
+											'event.persons^3',
+											'conference.acronym^2',
+											'conference.title^2',
+											'event.description^1'
+										],
+										type => 'best_fields',
+										operator => 'or',
+										fuzziness => 1
+									},
+								},
+								{
+									prefix => {
+										'event.title' => {
+											value => $str,
+											boost => 12
+										}
+									}
+								},
+								{
+									prefix => {
+										'event.subtitle' => {
+											value => $str,
+											boost => 3
+										}
+									}
+								},
+								{
+									prefix => {
+										'conference.acronym' => {
+											value => $str,
+											boost => 2
+										}
+									}
+								},
+								{
+									prefix => {
+										'conference.persons' => {
+											value => $str,
+											boost => 1
+										}
+									}
+								}
+							]
+						}
+					},
+					boost => 1.2,
+					functions => [
+						{
+							"gauss" => {
+								"event.date" => {
+									"scale" => "96w",
+									"decay" => 0.5
+								}
+							}
+						}
+					]
+				}
+			},
+			from => $page * $per_page,
+			size => $per_page
+	);
 
-
-	$c->render(json => $ret);
+	$c->render_jsonp($ret);
 };
 
-get '/persons/:string' => sub {
-	my $c = shift;
-	my $str = $c->param('string');
+post '/term' => \&term_search;
+get '/term' => \&term_search;
 
-	my $ret = dosearch({
-			match => { 'event.persons' => {query => $str, fuzziness => 'AUTO'}}
-		});
+app->hook(before_dispatch => sub {
+		my $c = shift;
+		$c->req->url->base(Mojo::URL->new(q{http://koeln.media.ccc.de/search/api/}));
 
+		# remove the "/search/api"-prefix
+		shift @{$c->req->url->path};
+		shift @{$c->req->url->path};
 
-	$c->render(json => $ret);
-};
+		$c->res->headers->header( 'Access-Control-Allow-Origin' => '*' );
+		$c->res->headers->header( 'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS' );
+		$c->res->headers->header( 'Access-Control-Max-Age' => '3600' );
+	});
+
+app->types->type(json => "application/json; charset=utf-8");
+app->types->type(html => "text/html; charset=utf-8");
 
 app->start;

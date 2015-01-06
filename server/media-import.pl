@@ -4,7 +4,7 @@ use v5.12;
 use strict;
 use warnings;
 
-use local::lib ("$ENV{HOME}/.perl5");
+use local::lib;
 
 use LWP::Simple;
 use Search::Elasticsearch;
@@ -14,6 +14,14 @@ use Data::Dumper;
 use constant {
 	WEBGEN_PREFIX => "http://media.ccc.de/browse/",
 };
+
+$| = 1;
+
+my $verbose = 0;
+if(defined $ARGV[0] and $ARGV[0] eq '-v') {
+	shift @ARGV;
+	$verbose = 1;
+}
 
 my $raw;
 
@@ -66,8 +74,11 @@ foreach my $event (@{$events->{events}}) {
 				acronym => $conference->{acronym},
 
 				frontend_link => WEBGEN_PREFIX . $conference->{webgen_location},
+				logo => $conference->{logo_url} // "",
 				url => $event->{conference_url}
 			}
 		}
 	) or die "insert failed: $@";
+
+	print "." if $verbose;
 }
