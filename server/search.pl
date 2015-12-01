@@ -49,7 +49,7 @@ sub term_search {
 											'event.description^1'
 										],
 										type => 'best_fields',
-										operator => 'or',
+										operator => 'and',
 										fuzziness => 1
 									},
 								},
